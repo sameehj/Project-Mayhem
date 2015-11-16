@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity{
                 SharedPreferences.Editor edit = settings.edit();
                 edit.putString("phone", phone.getText().toString());
                 edit.apply();
-
                 ParseLogin(phone.getText().toString());
             }
         });

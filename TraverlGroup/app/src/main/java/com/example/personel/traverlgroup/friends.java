@@ -1,10 +1,16 @@
 package com.example.personel.traverlgroup;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -25,24 +31,66 @@ public class friends extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_friends);d
+        setContentView(R.layout.activity_friends);
 
-        SharedPreferences prefs = getSharedPreferences("phone", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
+        final SharedPreferences prefs = getSharedPreferences("phone", Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = prefs.edit();
 
 
         Set<String> set = prefs.getStringSet("friends", null);
         if(set == null)
         {
             set = new HashSet<String>();
-            editor.putStringSet("key", set);
+            editor.putStringSet("friends", set);
             editor.commit();
         }
         ListView lv = (ListView)findViewById(R.id.listView);
 
-        String[] lv_arr = (String[]) set.toArray();
+        String[] lv_arr = new String[set.size()];
+        lv_arr = set.toArray(lv_arr);
+
+        final Context context = this;
+
         lv.setAdapter(new ArrayAdapter<String>(friends.this,
                 android.R.layout.simple_list_item_1, lv_arr));
+
+        Button button2 = (Button)findViewById(R.id.button2);
+
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Enter friend phone:");
+
+// Set up the input
+                final EditText input = new EditText(context);
+// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                builder.setView(input);
+                // Set up the buttons
+                builder.setPositiveButton("ADD", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Set<String> set = prefs.getStringSet("friends", null);
+
+                        String friend = input.getText().toString();
+
+                        set.add(friend);
+                        editor.putStringSet("friends", set);
+                        editor.commit();
+                        finish();
+                        startActivity(getIntent());
+                    }
+                });
+                builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.show();
+            }});
 
     }
 }

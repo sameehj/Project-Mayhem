@@ -19,11 +19,13 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import java.util.List;
+import java.util.Set;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
@@ -61,7 +63,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 startActivity(intent);
             }});
 
-
+        updateFriends();
     }
 
 
@@ -76,12 +78,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+//        mMap = googleMap;
+//
+//        // Add a marker in Sydney and move the camera
+//        LatLng sydney = new LatLng(-34, 151);
+//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        updateFriends();
     }
 
     public void moveCameraForFriend(String phone){
@@ -92,6 +95,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onLocationChanged(Location location) {
         ParseQuery< ParseObject > query = ParseQuery.getQuery("traveler");
+
         final SharedPreferences settings = getSharedPreferences("phone", Context.MODE_PRIVATE);
         query.whereEqualTo("phone", settings.getString("phone", ""));
         try {
@@ -120,6 +124,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onProviderDisabled(String provider) {
+
+    }
+
+    public void updateFriends(){
+        final SharedPreferences prefs = getSharedPreferences("phone", Context.MODE_PRIVATE);
+        Set<String> set = prefs.getStringSet("friends", null);
+        for(String friend : set){
+            ParseQuery< ParseObject > query = ParseQuery.getQuery("traveler");
+            query.whereEqualTo("phone", friend);
+            try {
+                ParseObject friendParseObject = query.getFirst();
+                ParseGeoPoint pgp = friendParseObject.getParseGeoPoint("lastLoc");
+                LatLng sydney2 = new LatLng(pgp.getLatitude(), pgp.getLongitude());
+                mMap.addMarker(new MarkerOptions().position(sydney2).title("friends"));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(sydney2, 15));
+                //              mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney2));
+            }catch(Exception e){
+int x;
+            }
+        }
 
     }
 
