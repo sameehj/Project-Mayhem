@@ -51,6 +51,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 final SharedPreferences settings = getSharedPreferences("phone", Context.MODE_PRIVATE);
                 settings.edit().remove("phone");
+                settings.edit().remove("friends");
                 finish();
             }
         });
@@ -130,6 +131,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void updateFriends(){
         final SharedPreferences prefs = getSharedPreferences("phone", Context.MODE_PRIVATE);
         Set<String> set = prefs.getStringSet("friends", null);
+        if (set == null) return;
         for(String friend : set){
             ParseQuery< ParseObject > query = ParseQuery.getQuery("traveler");
             query.whereEqualTo("phone", friend);
