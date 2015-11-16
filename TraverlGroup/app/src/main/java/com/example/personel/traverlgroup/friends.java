@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -90,7 +91,30 @@ public class friends extends AppCompatActivity {
                 });
 
                 builder.show();
-            }});
+            }
+        });
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> a, View v, int position, long id) {
+                AlertDialog.Builder adb = new AlertDialog.Builder(friends.this);
+                adb.setTitle("Delete?");
+                adb.setMessage("Are you sure you want to delete " + position);
+                final int positionToRemove = position;
+                adb.setNegativeButton("Cancel", null);
+                adb.setPositiveButton("Ok", new AlertDialog.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Set<String> set = prefs.getStringSet("friends", null);
+                        String[] lv_arr = new String[set.size()];
+                        lv_arr = set.toArray(lv_arr);
+                        set.remove(lv_arr[positionToRemove]);
 
+                        editor.putStringSet("friends", set);
+                        editor.commit();
+                        finish();
+                        startActivity(getIntent());
+                    }
+                });
+                adb.show();
+            }
+        });
     }
 }
