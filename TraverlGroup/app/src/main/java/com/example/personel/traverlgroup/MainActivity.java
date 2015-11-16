@@ -5,6 +5,9 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
@@ -16,13 +19,14 @@ import android.widget.TextView;
 
 import com.parse.FindCallback;
 import com.parse.Parse;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import java.text.ParseException;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +43,15 @@ public class MainActivity extends AppCompatActivity {
 
         final SharedPreferences settings = getSharedPreferences("phone", Context.MODE_PRIVATE);
 
+
+
         String url = settings.getString("phone", "");
 
         if(url.length() > 0) ParseLogin(url);
+
+
+        // location
+
 
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -52,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 ParseLogin(phone.getText().toString());
             }
         });
+
     }
 
     void ParseLogin(String phone) {

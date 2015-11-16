@@ -1,7 +1,14 @@
 package com.example.personel.traverlgroup;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -12,11 +19,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+import java.util.List;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
     private GoogleMap mMap;
-
+    private LocationManager mLocationManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,7 +37,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        
+
+        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        long timem = 30000;
+        float dis = 5;
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, timem, dis, this);
+
+        Button signout = (Button)findViewById(R.id.radioPopular);
+
+        signout.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                final SharedPreferences settings = getSharedPreferences("phone", Context.MODE_PRIVATE);
+                settings.edit().remove("phone");
+                finish();
+            }
+        });
+
+        Button friends2 = (Button)findViewById(R.id.friends);
+
+        friends2.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(MapsActivity.this, friends.class);
+                startActivity(intent);
+            }});
 
 
     }
@@ -49,4 +83,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
+
+    public void moveCameraForFriend(String phone){
+        mMap.clear();
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        ParseQuery< ParseObject > query = ParseQuery.getQuery("traveler");
+        final SharedPreferences settings = getSharedPreferences("phone", Context.MODE_PRIVATE);
+        query.whereEqualTo("phone", settings.getString("phone", ""));
+        try {
+
+
+                ParseGeoPoint point = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
+                List<ParseObject> pr = query.find();
+                pr.get(0).put("lastLoc", point);
+                pr.get(0).save();
+
+        } catch (Exception e) {
+           return;
+        }
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
 }
