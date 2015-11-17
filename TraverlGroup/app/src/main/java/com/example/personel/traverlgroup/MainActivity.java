@@ -47,7 +47,11 @@ public class MainActivity extends AppCompatActivity{
 
         String url = settings.getString("phone", "");
 
-        if(url.length() > 0) ParseLogin(url);
+        if(url.length() > 0)
+        {
+            Intent intent = new Intent(this, MapsActivity.class);
+            startActivity(intent);
+        }
 
 
         // location
@@ -64,11 +68,16 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-    void ParseLogin(String phone) {
+    void ParseLogin(final String phone) {
         ParseQuery < ParseObject > query = ParseQuery.getQuery("traveler");
         query.whereEqualTo("phone", phone);
         try {
             List<ParseObject> pr = query.find();
+            validatePhoneNumber vpn = new validatePhoneNumber(phone);
+            if(vpn.valideIt(getContentResolver()) == false)
+            {
+                return;
+            }
             if(pr.size() == 0 ){
                 ParseObject traveler = new ParseObject("traveler");
                 traveler.put("phone", phone);
